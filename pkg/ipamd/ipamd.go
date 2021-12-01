@@ -823,11 +823,6 @@ func (c *IPAMContext) updateLastNodeIPPoolAction() {
 }
 
 
-func exitErrorf(msg string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, msg+"\n", args...)
-	os.Exit(1)
-}
-
 func (c *IPAMContext) tryAllocateENI(ctx context.Context) error {
 	var securityGroups []*string
 	var securityGroupIds []string
@@ -852,7 +847,8 @@ func (c *IPAMContext) tryAllocateENI(ctx context.Context) error {
 		err = c.awsClient.ValidateSecurityGroups(securityGroupIds)
 
 		if err != nil {
-			exitErrorf("%s", err.Error())
+			log.Errorf("Invalid Security Groups: %v", eniCfg.SecurityGroups)
+			return err
 		}
 
 		subnet = eniCfg.Subnet
