@@ -822,8 +822,15 @@ func (c *IPAMContext) updateLastNodeIPPoolAction() {
 	c.logPoolStats(stats)
 }
 
+
+func exitErrorf(msg string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, msg+"\n", args...)
+	os.Exit(1)
+}
+
 func (c *IPAMContext) tryAllocateENI(ctx context.Context) error {
 	var securityGroups []*string
+	var securityGroupIds []string
 	var subnet string
 
 	if c.useCustomNetworking {
@@ -836,8 +843,26 @@ func (c *IPAMContext) tryAllocateENI(ctx context.Context) error {
 
 		log.Infof("ipamd: using custom network config: %v, %s", eniCfg.SecurityGroups, eniCfg.Subnet)
 		for _, sgID := range eniCfg.SecurityGroups {
+			// Retrieve the security group descriptions
 			log.Debugf("Found security-group id: %s", sgID)
 			securityGroups = append(securityGroups, aws.String(sgID))
+			securityGroupIds = append(securityGroupIds, sgID)
+		}
+
+		_ , err := svc.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+			GroupIds: aws.StringSlice(securityGroupIds),
+		})
+
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				switch aerr.Code() {
+				case "InvalidGroupId.Malformed":
+					fallthrough
+				case "InvalidGroup.NotFound":
+					exitErrorf("%s.", aerr.Message())
+				}
+			}
+			exitErrorf("Unable to get descriptions for security groups, %v", err)
 		}
 		subnet = eniCfg.Subnet
 	}
