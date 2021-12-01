@@ -849,21 +849,12 @@ func (c *IPAMContext) tryAllocateENI(ctx context.Context) error {
 			securityGroupIds = append(securityGroupIds, sgID)
 		}
 
-		_ , err := svc.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
-			GroupIds: aws.StringSlice(securityGroupIds),
-		})
+		err = c.awsClient.ValidateSecurityGroups(securityGroupIds)
 
 		if err != nil {
-			if aerr, ok := err.(awserr.Error); ok {
-				switch aerr.Code() {
-				case "InvalidGroupId.Malformed":
-					fallthrough
-				case "InvalidGroup.NotFound":
-					exitErrorf("%s.", aerr.Message())
-				}
-			}
-			exitErrorf("Unable to get descriptions for security groups, %v", err)
+			exitErrorf("%s", err.Error())
 		}
+
 		subnet = eniCfg.Subnet
 	}
 
