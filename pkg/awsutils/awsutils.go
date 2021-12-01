@@ -890,6 +890,31 @@ func (cache *EC2InstanceMetadataCache) TagENI(eniID string, currentTags map[stri
 	})
 }
 
+
+func (cache *EC2InstanceMetadataCache) ValidateSecurityGroups(securityGroupIds []string) error {
+
+	_, err := cache.ec2SVC.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		GroupIds: aws.StringSlice(securityGroupIds),
+	})
+
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case "InvalidGroupId.Malformed":
+				fallthrough
+			case "InvalidGroup.NotFound":
+				return errors.Wrap(err, "Invalid Security Group Id")
+			}
+		}
+		return errors.Wrap(err, "Invalid Security Group Id")
+	}
+
+	return nil
+}
+
+
+
+
 // containsPrivateIPAddressLimitExceededError returns whether exceeds ENI's IP address limit
 func containsPrivateIPAddressLimitExceededError(err error) bool {
 	if aerr, ok := err.(awserr.Error); ok {
