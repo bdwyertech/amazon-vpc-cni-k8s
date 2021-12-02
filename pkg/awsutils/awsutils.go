@@ -200,6 +200,9 @@ type APIs interface {
 
 	// FetchInstanceTypeLimits Verify if the InstanceNetworkingLimits has the ENI limits else make EC2 call to fill cache.
 	FetchInstanceTypeLimits() error
+
+	//ValidateSecurityGroups Validate a list of security group ids before they are used to create ENIs
+	ValidateSecurityGroups(securityGroupIds []string) error
 }
 
 // EC2InstanceMetadataCache caches instance metadata
