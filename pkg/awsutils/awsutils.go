@@ -890,7 +890,6 @@ func (cache *EC2InstanceMetadataCache) TagENI(eniID string, currentTags map[stri
 	})
 }
 
-
 func (cache *EC2InstanceMetadataCache) ValidateSecurityGroups(securityGroupIds []string) error {
 
 	_, err := cache.ec2SVC.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
@@ -911,9 +910,6 @@ func (cache *EC2InstanceMetadataCache) ValidateSecurityGroups(securityGroupIds [
 
 	return nil
 }
-
-
-
 
 // containsPrivateIPAddressLimitExceededError returns whether exceeds ENI's IP address limit
 func containsPrivateIPAddressLimitExceededError(err error) bool {

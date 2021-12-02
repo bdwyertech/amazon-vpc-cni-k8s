@@ -822,7 +822,6 @@ func (c *IPAMContext) updateLastNodeIPPoolAction() {
 	c.logPoolStats(stats)
 }
 
-
 func (c *IPAMContext) tryAllocateENI(ctx context.Context) error {
 	var securityGroups []*string
 	var securityGroupIds []string
