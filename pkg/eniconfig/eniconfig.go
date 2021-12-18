@@ -47,6 +47,7 @@ const (
 	//   This will set eniConfigLabelDef to eniConfigOverride
 	envEniConfigAnnotationDef = "ENI_CONFIG_ANNOTATION_DEF"
 	envEniConfigLabelDef      = "ENI_CONFIG_LABEL_DEF"
+        envEniConfigLabelSuffix   = "ENI_CONFIG_LABEL_SUFFIX"
 )
 
 // ENIConfig interface
@@ -66,6 +67,7 @@ type ENIConfigInfo struct {
 	MyENI                  string
 	EniConfigAnnotationDef string
 	EniConfigLabelDef      string
+        EniConfigLabelSuffix   string
 }
 
 // MyENIConfig returns the ENIConfig applicable to the particular node
@@ -129,6 +131,7 @@ func GetNodeSpecificENIConfigName(ctx context.Context, k8sClient client.Client) 
 	}
 
 	//Derive ENIConfig Name from either externally managed label, Node Annotations or Labels
+        // Add something here to leverage a  suffix.  E.g. AZ-SecureSubnet
 	val, ok := node.GetLabels()[externalEniConfigLabel]
 	if !ok {
 		val, ok = node.GetAnnotations()[getEniConfigAnnotationDef()]
@@ -138,7 +141,9 @@ func GetNodeSpecificENIConfigName(ctx context.Context, k8sClient client.Client) 
 				val = eniConfigDefault
 			}
 		}
-	}
+	} else {
+                Val + suffix
+}
 
 	eniConfigName = val
 	if val != eniConfigDefault {
